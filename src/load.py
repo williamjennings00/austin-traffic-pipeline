@@ -16,7 +16,7 @@ logger.info("Loaded %s cleaned traffic records", len(df))
 
 df = df.astype(object).where(pd.notna(df), None)
 
-psycopg2.connect(
+connection = psycopg2.connect(
     dbname="austin_traffic",
     user="postgres",
     password="postgres",
