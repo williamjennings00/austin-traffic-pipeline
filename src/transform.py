@@ -23,6 +23,16 @@ df["published_date"] = pd.to_datetime(
     errors="coerce",
 )
 
+df["issue_reported"] = (
+    df["issue_reported"]
+    .str.strip()
+    .str.upper()
+)
+
+df["issue_reported"] = df["issue_reported"].replace({
+    "ZSTALLED VEHICLE": "STALLED VEHICLE",
+})
+
 df["latitude"] = pd.to_numeric(
     df["latitude"],
     errors="coerce",
