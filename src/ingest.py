@@ -1,17 +1,47 @@
 import json
 import time
 
+import psycopg2
 import requests
 
 
 base_url = "https://data.austintexas.gov/resource/dx9v-zd7x.json"
+
+connection = psycopg2.connect(
+    dbname="austin_traffic"
+)
+
+cursor = connection.cursor()
+
+cursor.execute(
+    "SELECT MAX(published_date) FROM traffic_incidents;"
+)
+
+latest_date = cursor.fetchone()[0]
+
+cursor.close()
+connection.close()
 
 limit = 1000
 offset = 0
 all_records = []
 
 while True:
-    url = f"{base_url}?$limit={limit}&$offset={offset}"
+    if latest_date:
+        latest_date_str = latest_date.isoformat()
+
+        url = (
+            f"{base_url}"
+            f"?$limit={limit}"
+            f"&$offset={offset}"
+            f"&$where=published_date > '{latest_date_str}'"
+        )
+    else:
+        url = (
+            f"{base_url}"
+            f"?$limit={limit}"
+            f"&$offset={offset}"
+        )
 
     for attempt in range(3):
         try:
@@ -41,4 +71,4 @@ while True:
 with open("data/raw/traffic.json", "w") as file:
     json.dump(all_records, file, indent=2)
 
-print(f"Saved {len(all_records)} total traffic records.")
+print(f"Saved {len(all_records)} new traffic records.")
