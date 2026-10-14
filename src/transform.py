@@ -3,6 +3,7 @@ import os
 
 import pandas as pd
 
+
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO").upper(),
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
@@ -10,22 +11,32 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-df = pd.read_json("data/raw/traffic.json")
-input_count = len(df)
-logger.info("Loaded %s raw traffic records", input_count)
-
-df = df[
-    [
-        "traffic_report_id",
-        "published_date",
-        "issue_reported",
-        "latitude",
-        "longitude",
-        "address",
-        "traffic_report_status",
-        "agency",
-    ]
+columns = [
+    "traffic_report_id",
+    "published_date",
+    "issue_reported",
+    "latitude",
+    "longitude",
+    "address",
+    "traffic_report_status",
+    "agency",
 ]
+
+df = pd.read_json("data/raw/traffic.json")
+
+logger.info("Loaded %s raw traffic records", len(df))
+
+if df.empty:
+    logger.info("No new traffic records to transform")
+
+    pd.DataFrame(columns=columns).to_csv(
+        "data/processed/traffic_clean.csv",
+        index=False,
+    )
+
+    raise SystemExit(0)
+
+df = df[columns]
 
 df["agency"] = df["agency"].str.strip()
 
@@ -54,22 +65,17 @@ df["longitude"] = pd.to_numeric(
     errors="coerce",
 )
 
+before = len(df)
+
 df = df[df["latitude"].between(-90, 90)]
 df = df[df["longitude"].between(-180, 180)]
-
-before = len(df)
 
 df = df.drop_duplicates(
     subset=["traffic_report_id"],
     keep="first",
 )
 
-removed_duplicates = before - len(df)
-
-logger.info(
-    "Removed %s duplicate traffic records",
-    removed_duplicates,
-)
+removed = before - len(df)
 
 df.to_csv(
     "data/processed/traffic_clean.csv",
@@ -77,8 +83,7 @@ df.to_csv(
 )
 
 logger.info(
-    "Saved %s cleaned traffic records to data/processed/traffic_clean.csv "
-    "(%s rows removed)",
+    "Saved %s cleaned traffic records to data/processed/traffic_clean.csv (%s rows removed)",
     len(df),
-    input_count - len(df),
+    removed,
 )
