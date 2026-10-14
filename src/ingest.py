@@ -1,4 +1,6 @@
 import json
+import time
+
 import requests
 
 
@@ -11,10 +13,21 @@ all_records = []
 while True:
     url = f"{base_url}?$limit={limit}&$offset={offset}"
 
-    response = requests.get(url)
-    response.raise_for_status()
+    for attempt in range(3):
+        try:
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            batch = response.json()
+            break
 
-    batch = response.json()
+        except requests.RequestException as error:
+            print(f"Request failed at offset {offset}: {error}")
+
+            if attempt == 2:
+                raise
+
+            print("Retrying in 5 seconds...")
+            time.sleep(5)
 
     if not batch:
         break
