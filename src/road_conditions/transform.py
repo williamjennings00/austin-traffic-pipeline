@@ -34,9 +34,13 @@ columns = [
 
 df = df[columns]
 
-df["timestamp"] = pd.to_datetime(
-    df["timestamp"],
-    errors="coerce",
+df["timestamp"] = (
+    pd.to_datetime(
+        df["timestamp"],
+        errors="coerce",
+    )
+    .dt.tz_localize("America/Chicago")
+    .dt.tz_convert("UTC")
 )
 
 numeric_columns = [
