@@ -1,6 +1,6 @@
 # Austin Traffic Pipeline
 
-This project ingests Austin traffic incidents, cleans the records, and loads them into PostgreSQL.
+Data pipeline that ingests, cleans, validates, and integrates Austin traffic and contextual data for analysis and reporting.
 
 
 How to Run:
