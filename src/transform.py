@@ -57,6 +57,20 @@ df["longitude"] = pd.to_numeric(
 df = df[df["latitude"].between(-90, 90)]
 df = df[df["longitude"].between(-180, 180)]
 
+before = len(df)
+
+df = df.drop_duplicates(
+    subset=["traffic_report_id"],
+    keep="first",
+)
+
+removed_duplicates = before - len(df)
+
+logger.info(
+    "Removed %s duplicate traffic records",
+    removed_duplicates,
+)
+
 df.to_csv(
     "data/processed/traffic_clean.csv",
     index=False,
