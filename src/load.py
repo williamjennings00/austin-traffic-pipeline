@@ -16,11 +16,15 @@ logger.info("Loaded %s cleaned traffic records", len(df))
 
 df = df.astype(object).where(pd.notna(df), None)
 
+db_host = os.getenv("DB_HOST", "localhost")
+db_user = os.getenv("DB_USER", "apollo")
+db_password = os.getenv("DB_PASSWORD")
+
 connection = psycopg2.connect(
     dbname="austin_traffic",
-    user="postgres",
-    password="postgres",
-    host="db",
+    user=db_user,
+    password=db_password,
+    host=db_host,
     port=5432,
 )
 
