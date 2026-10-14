@@ -1,6 +1,5 @@
 #!/bin/bash
-
-source venv/bin/activate
+set -e
 
 python src/ingest.py
 python src/transform.py
