@@ -4,6 +4,8 @@ import psycopg2
 
 df = pd.read_csv("data/processed/traffic_clean.csv")
 
+df = df.astype(object).where(pd.notna(df), None)
+
 connection = psycopg2.connect(
     dbname="austin_traffic"
 )
