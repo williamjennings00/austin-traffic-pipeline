@@ -15,8 +15,12 @@ logger = logging.getLogger(__name__)
 
 base_url = "https://data.austintexas.gov/resource/dx9v-zd7x.json"
 
-connection = psycopg2.connect(
-    dbname="austin_traffic"
+psycopg2.connect(
+    dbname="austin_traffic",
+    user="postgres",
+    password="postgres",
+    host="db",
+    port=5432,
 )
 
 cursor = connection.cursor()
