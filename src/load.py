@@ -3,6 +3,10 @@ import os
 
 import pandas as pd
 import psycopg2
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO").upper(),
@@ -16,16 +20,12 @@ logger.info("Loaded %s cleaned traffic records", len(df))
 
 df = df.astype(object).where(pd.notna(df), None)
 
-db_host = os.getenv("DB_HOST", "localhost")
-db_user = os.getenv("DB_USER", "apollo")
-db_password = os.getenv("DB_PASSWORD")
-
 connection = psycopg2.connect(
-    dbname="austin_traffic",
-    user=db_user,
-    password=db_password,
-    host=db_host,
-    port=5432,
+    dbname=os.getenv("DB_NAME"),
+    user=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASSWORD") or None,
+    host=os.getenv("DB_HOST", "localhost"),
+    port=os.getenv("DB_PORT", "5432"),
 )
 
 cursor = connection.cursor()
