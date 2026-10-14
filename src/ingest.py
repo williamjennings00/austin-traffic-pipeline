@@ -1,16 +1,31 @@
 import json
-
 import requests
 
 
-url = "https://data.austintexas.gov/resource/dx9v-zd7x.json?$limit=100"
+base_url = "https://data.austintexas.gov/resource/dx9v-zd7x.json"
 
-response = requests.get(url)
-response.raise_for_status()
+limit = 1000
+offset = 0
+all_records = []
 
-data = response.json()
+while True:
+    url = f"{base_url}?$limit={limit}&$offset={offset}"
+
+    response = requests.get(url)
+    response.raise_for_status()
+
+    batch = response.json()
+
+    if not batch:
+        break
+
+    all_records.extend(batch)
+
+    print(f"Fetched {len(batch)} records at offset {offset}")
+
+    offset += limit
 
 with open("data/raw/traffic.json", "w") as file:
-    json.dump(data, file, indent=2)
+    json.dump(all_records, file, indent=2)
 
-print(f"Saved {len(data)} traffic records.")
+print(f"Saved {len(all_records)} total traffic records.")
