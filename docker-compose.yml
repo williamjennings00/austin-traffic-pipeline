@@ -16,10 +16,14 @@ services:
     depends_on:
       - db
     environment:
+      DB_NAME: austin_traffic
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: db
+      DB_PORT: 5432
       LOG_LEVEL: INFO
     volumes:
       - .:/app
 
 volumes:
   postgres_data:
-
