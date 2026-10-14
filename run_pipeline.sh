@@ -10,4 +10,8 @@ python src/weather/ingest.py
 python src/weather/transform.py
 python src/weather/load.py
 
+python src/construction/ingest.py
+python src/construction/transform.py
+python src/construction/load.py
+
 python src/analytics/create_views.py
