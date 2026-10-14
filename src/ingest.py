@@ -2,10 +2,10 @@ import json
 import logging
 import os
 import time
+from datetime import timezone
 
 import psycopg2
 import requests
-
 from dotenv import load_dotenv
 
 
@@ -35,6 +35,7 @@ cursor.execute(
 )
 
 latest_date = cursor.fetchone()[0]
+
 logger.info(
     "Starting traffic ingestion; latest stored published_date: %s",
     latest_date,
@@ -48,25 +49,30 @@ offset = 0
 all_records = []
 
 while True:
-    if latest_date:
-        latest_date_str = latest_date.isoformat()
+    params = {
+        "$limit": limit,
+        "$offset": offset,
+    }
 
-        url = (
-            f"{base_url}"
-            f"?$limit={limit}"
-            f"&$offset={offset}"
-            f"&$where=published_date > '{latest_date_str}'"
+    if latest_date:
+        latest_date_str = (
+            latest_date
+            .astimezone(timezone.utc)
+            .strftime("%Y-%m-%dT%H:%M:%S.000")
         )
-    else:
-        url = (
-            f"{base_url}"
-            f"?$limit={limit}"
-            f"&$offset={offset}"
+
+        params["$where"] = (
+            f"published_date > '{latest_date_str}'"
         )
 
     for attempt in range(3):
         try:
-            response = requests.get(url, timeout=30)
+            response = requests.get(
+                base_url,
+                params=params,
+                timeout=30,
+            )
+
             response.raise_for_status()
             batch = response.json()
             break
@@ -90,11 +96,18 @@ while True:
 
     all_records.extend(batch)
 
-    logger.info("Fetched %s records at offset %s", len(batch), offset)
+    logger.info(
+        "Fetched %s records at offset %s",
+        len(batch),
+        offset,
+    )
 
     offset += limit
 
 with open("data/raw/traffic.json", "w") as file:
     json.dump(all_records, file, indent=2)
 
-logger.info("Saved %s new traffic records to data/raw/traffic.json", len(all_records))
+logger.info(
+    "Saved %s new traffic records to data/raw/traffic.json",
+    len(all_records),
+)
