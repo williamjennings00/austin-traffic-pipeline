@@ -1,9 +1,17 @@
 import json
+import logging
+import os
 import time
 
 import psycopg2
 import requests
 
+
+logging.basicConfig(
+    level=os.getenv("LOG_LEVEL", "INFO").upper(),
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 base_url = "https://data.austintexas.gov/resource/dx9v-zd7x.json"
 
@@ -18,6 +26,10 @@ cursor.execute(
 )
 
 latest_date = cursor.fetchone()[0]
+logger.info(
+    "Starting traffic ingestion; latest stored published_date: %s",
+    latest_date,
+)
 
 cursor.close()
 connection.close()
@@ -51,12 +63,17 @@ while True:
             break
 
         except requests.RequestException as error:
-            print(f"Request failed at offset {offset}: {error}")
+            logger.warning(
+                "Request failed at offset %s (attempt %s/3): %s",
+                offset,
+                attempt + 1,
+                error,
+            )
 
             if attempt == 2:
                 raise
 
-            print("Retrying in 5 seconds...")
+            logger.info("Retrying request in 5 seconds")
             time.sleep(5)
 
     if not batch:
@@ -64,11 +81,11 @@ while True:
 
     all_records.extend(batch)
 
-    print(f"Fetched {len(batch)} records at offset {offset}")
+    logger.info("Fetched %s records at offset %s", len(batch), offset)
 
     offset += limit
 
 with open("data/raw/traffic.json", "w") as file:
     json.dump(all_records, file, indent=2)
 
-print(f"Saved {len(all_records)} new traffic records.")
+logger.info("Saved %s new traffic records to data/raw/traffic.json", len(all_records))

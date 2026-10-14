@@ -1,8 +1,18 @@
+import logging
+import os
+
 import pandas as pd
 import psycopg2
 
+logging.basicConfig(
+    level=os.getenv("LOG_LEVEL", "INFO").upper(),
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
+logger = logging.getLogger(__name__)
+
 
 df = pd.read_csv("data/processed/traffic_clean.csv")
+logger.info("Loaded %s cleaned traffic records", len(df))
 
 df = df.astype(object).where(pd.notna(df), None)
 
@@ -45,4 +55,4 @@ connection.commit()
 cursor.close()
 connection.close()
 
-print(f"Loaded {len(df)} traffic records into PostgreSQL.")
+logger.info("Loaded %s traffic records into PostgreSQL", len(df))

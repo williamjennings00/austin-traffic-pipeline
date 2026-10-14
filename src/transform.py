@@ -1,7 +1,18 @@
+import logging
+import os
+
 import pandas as pd
+
+logging.basicConfig(
+    level=os.getenv("LOG_LEVEL", "INFO").upper(),
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 
 df = pd.read_json("data/raw/traffic.json")
+input_count = len(df)
+logger.info("Loaded %s raw traffic records", input_count)
 
 df = df[
     [
@@ -51,5 +62,9 @@ df.to_csv(
     index=False,
 )
 
-print(df.head())
-print(f"Saved {len(df)} cleaned traffic records.")
+logger.info(
+    "Saved %s cleaned traffic records to data/processed/traffic_clean.csv "
+    "(%s rows removed)",
+    len(df),
+    input_count - len(df),
+)
