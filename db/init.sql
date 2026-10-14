@@ -32,3 +32,18 @@ CREATE TABLE IF NOT EXISTS construction_zones (
     critical_corridor TEXT,
     geometry JSONB
 );
+
+CREATE TABLE IF NOT EXISTS road_conditions (
+    id BIGINT PRIMARY KEY,
+    sensor_id BIGINT,
+    location_name TEXT,
+    location JSONB,
+    timestamp TIMESTAMPTZ,
+    air_temp_primary DOUBLE PRECISION,
+    temp_surface DOUBLE PRECISION,
+    condition_text_measured TEXT,
+    friction_value_measured DOUBLE PRECISION,
+    grip_text TEXT,
+    relative_humidity DOUBLE PRECISION,
+    status_code INTEGER
+);

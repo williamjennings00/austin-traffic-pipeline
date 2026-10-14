@@ -14,4 +14,8 @@ python src/construction/ingest.py
 python src/construction/transform.py
 python src/construction/load.py
 
+python src/road_conditions/ingest.py
+python src/road_conditions/transform.py
+python src/road_conditions/load.py
+
 python src/analytics/create_views.py
