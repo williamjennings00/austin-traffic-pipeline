@@ -9,3 +9,5 @@ python src/load.py
 python src/ingest_weather.py
 python src/transform_weather.py
 python src/load_weather.py
+
+python src/create_views.py
